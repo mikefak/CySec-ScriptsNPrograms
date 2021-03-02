@@ -6,16 +6,7 @@ today = date.today()
 flag = False
 
 while not flag:
-	dec = input('Would you like to import a text file with a list of users (no for manual entry) 	(Y/N): ')read idea
-echo
-
-if  [[$idea == 1]]; then
-        echo 'Excellent Choice'
-elif [[$idea == 2]]; then
-        echo 'boring'
-fi
-
-	
+	dec = input('Would you like to import a text file with a list of users (no for manual entry) (Y/N): ")
 	if dec == 'Y' or dec == 'N':
 		flag = True
 	else:
