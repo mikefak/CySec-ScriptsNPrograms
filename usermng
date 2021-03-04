@@ -15,7 +15,6 @@ while not flag:
 if dec == 'N':
 	inpusers = [input('Please enter a list of verified users: ')]
 	infile = open('/etc/passwd', 'r')
-	outfilebad = open(f'unverified_users {today}', 'w')
 	read = infile.readlines()
 	naughtylist = []
 	for names in read:
