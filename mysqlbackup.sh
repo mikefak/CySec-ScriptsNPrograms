@@ -1,27 +1,21 @@
 #!/bin/bash
 
-#Enter mysql user and pass
+#default backup name, feel free to change
+backup='databases.sql'
 
-username='Enter username here'
-password='Enter password here'
-
-#Output directory, defaults to /var/backups
-direc=/var/backups
-echo 'backing up mysql databases to $(date)...'
-
-mysqldump -u $username -p $password --flush-privileges --all-databases > databases.sql
+#backup command
+sudo mysqldump --flush-privileges --all-databases > $backup
 
 #Save backup in desired directory
 echo where would you like to save your backup?
 read bkupd
-mv databases.sql $bkupd
+sudo mv databases.sql $bkupd
 
 #Error handling 
 if [ $? == 0 ]; then
 
 	echo 'Backup sucessfully created'
 else
-	echo 'Backup failed. Please enter a valid directory and try again.'
-	#exit
+	echo 'Backup failed. Please enter a valid directory/backup name and try again'
+	exit
 fi
-
