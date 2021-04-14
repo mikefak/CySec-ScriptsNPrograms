@@ -1,15 +1,17 @@
 #!/bin/bash
 
+#run with sudo
+
 #default backup name, feel free to change
 backup='databases.sql'
 
 #backup command
-sudo mysqldump --flush-privileges --all-databases > $backup
+mysqldump --flush-privileges --all-databases > $backup
 
 #Save backup in desired directory
 echo where would you like to save your backup?
-read bkupd
-sudo mv databases.sql $bkupd
+read -r bkupd
+mv databases.sql "$bkupd"
 
 #Error handling 
 if [ $? == 0 ]; then
