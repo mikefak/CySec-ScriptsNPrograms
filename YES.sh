@@ -8,14 +8,13 @@ ooooo  oooo  ooooooooooo      oooooooo8
   888  88     888    88      888             
     888       888ooo8         888oooooo      
     888  ooo  888    oo  ooo         888 ooo 
-   o888o 888 o888ooo8888 888 o88oooo888  888  Version 0.1 (beta)             
-"
+   o888o 888 o888ooo8888 888 o88oooo888  888  Version 0.1 (beta)"
 echo -e "Yorge's Enumeration Script (Y.E.S.) by @YorgeZ\n"
 echo -e "------------------------------------------------------------\n"
 
 function OS()
 {
-	echo "OPERATING SYSTEM (-o)"
+	echo -e "OPERATING SYSTEM (-o)\n"
     
     echo "The current user is:"
 	WHOAMI=$(whoami 2>/dev/null)
@@ -23,7 +22,7 @@ function OS()
 	then
 		echo -e "$WHOAMI\n"
 	else
-		echo -e "ERROR (Make sure you run as root)\n 'whoami' did not return anything\n"
+		echo -e "ERROR (Make sure you run as root)\n'whoami' did not return anything\n"
 	fi
     
 	echo "Current user's group info:"
@@ -32,7 +31,7 @@ function OS()
 	then
 		echo -e "$ID\n"
 	else
-		echo -e "ERROR (Make sure you run as root)\n 'id' did not return anything\n"
+		echo -e "ERROR (Make sure you run as root)\n'id' did not return anything\n"
 	fi
 
 	echo "Host distribution and version:"
@@ -41,7 +40,7 @@ function OS()
 	then
 		echo -e "$RELEASE\n"
 	else
-		echo -e "ERROR (Make sure you run as root)\n 'release' did not return anything\n"
+		echo -e "ERROR (Make sure you run as root)\n'release' did not return anything\n"
 	fi 
 
 	echo "Kernel version and info:"
@@ -50,7 +49,7 @@ function OS()
 	then
 		echo -e "$PROCVERSION\n"
 	else
-		echo -e "ERROR (Make sure you run as root)\n 'procversion' did not return anything\n"
+		echo -e "ERROR (Make sure you run as root)\n'procversion' did not return anything\n"
 	fi
     
 	echo "Mounted partitions:"
@@ -59,7 +58,7 @@ function OS()
 	then
 		echo -e "$LSBLK\n"
 	else
-		echo -e "ERROR (Make sure you run as root)\n 'lsblk' did not return anything\n"
+		echo -e "ERROR (Make sure you run as root)\n'lsblk' did not return anything\n"
 	fi
     
     echo "CPU info:"
@@ -68,10 +67,68 @@ function OS()
 	then
 		echo -e "$CPUINFO\n"
 	else
-		echo -e "ERROR (Make sure you run as root)\n 'cpuinfo' did not return anything\n"
+		echo -e "ERROR (Make sure you run as root)\n'cpuinfo' did not return anything\n"
 	fi
     
-    echo ""
+    # add last/lastlog
+    
+}
+
+function Net()
+{
+    echo -e "Network Enumeration (-n)\n"
+
+    echo "The current user is:"
+	WHOAMI=$(whoami 2>/dev/null)
+	if [ "$WHOAMI" ];
+	then
+		echo -e "$WHOAMI\n"
+	else
+		echo -e "ERROR (Make sure you run as root)\n'whoami' did not return anything\n"
+	fi
+    
+    echo "Available interfaces:"
+    IFCONFIG=$(sudo ifconfig 2>/dev/null)
+	if [ "$IFCONFIG" ];
+	then
+		echo -e "$IFCONFIG\n"
+	else
+		echo -e "ERROR (Make sure you run as root)\n'ifconfig' did not return anything\n"
+    fi
+    
+    echo "Hosts:"
+    HOST=$(cat /etc/hosts 2>/dev/null)
+	if [ "$HOST" ];
+	then
+		echo -e "$HOST\n"
+	else
+		echo -e "ERROR (Make sure you run as root)\n'cat /etc/hosts' did not return anything\n"
+	fi
+    
+    echo "Active TCP/UDP Connections:"
+	NETSTAT=$(netstat -plunt 2>/dev/null)
+	if [ "$NETSTAT" ];
+	then
+		echo -e "$NETSTAT\n"
+	else
+		echo -e "ERROR (Make sure you run as root)\n'netstat -plunt' did not return anything\n"
+	fi
+    
+    echo "DNS Settings:"
+	DNSRESOLV=$(cat /etc/resolv.conf 2>/dev/null)
+	if [ "$DNSRESOLV" ];
+	then
+		echo -e "$DNSRESOLV\n"
+	else
+		echo -e "ERROR (Make sure you run as root)\n'netstat -plunt' did not return anything\n"
+	fi
+
+
+    # add more network settings from /etc/ files
+    # add selinux settings check
+    # add routing table check
+    # add iptables settings check
+    
 }
 
 function OptionsList()
@@ -79,7 +136,7 @@ function OptionsList()
 	echo -e " Usage: ./yes.sh <option>\n"
 	echo " Options List:"
 	echo -e "-o : Host OS info\n"
-
+    echo -e "-n : Network Config info\n"
 }
 
 OPTIONS="$1"
@@ -93,8 +150,16 @@ function YES()
 		then
 			    clear
                 OS
-            else 
-                OptionsList
+            else
+            
+            if [ "$OPTIONS" == "-n" ] || [ "$OPTIONS" == "n" ];
+            then
+                    clear
+                    Net
+                else 
+                    
+                    OptionsList
+            fi
         fi
     fi
 }
