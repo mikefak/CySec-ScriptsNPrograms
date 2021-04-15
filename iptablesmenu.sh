@@ -1,26 +1,106 @@
 #!/bin/bash
 
+#IPTABLES Simplified - created by @mikeffakhouri
+#must be ran with sudo permissions, ideal for servers looking to establish basic firewall rules with iptables along with other easy access methods of the utility.
+
+
 #Info collection and iptaples implementation
 function fwsetup() {
 
-	#Gather chain info
-	read p
-	echo you picked $p in the fwsetup function, cool 		
+	#Gathers active listening ports then print output into portnums file
+
+	echo "The setup process is designed for systems hosting servers that are prematurley baselined, proceed with caution."
+	echo 'Gathering active server info...'
+	netstat -plnt | grep LISTEN |  awk '{print$4}' | sed 's/.*://' > portnums	
+
+	#Establishes confirmation, then sorts through $portnums and establishes inbound/outbound rules
+
+	echo 
+	cat portnums
+	echo
+	read -p "The following ports will be appended as tcp iptable chains, is this ok? (y/n): " yn
+
+	while true; do
+
+		case $yn in
+
+			y)
+
+				while read port; do
+					if [[ $port -le 49153 ]] 
+						then 
+						iptables -A INPUT -p tcp --dport $port -m state --state NEW,ESTABLISHED -j ACCEPT
+						iptables -A OUTPUT -p tcp --sport $port -m state --state ESTABLISHED -j ACCEPT
+					fi
+				done < portnums
+				returning
+				rm portnums
+
+				break;;
+
+			n) 
+				break;;
+
+			*) echo 'Invalid entry '$yn 
+		esac
+	done
+
 }
 
-#Delete fw rules option
+#Delete fw rules 
 function delete() {
 
-	#ask to delete all rules or a single one, also prob make a warning message
-	echo delete func
+	#ask to delete all rules
+	echo -e 'WARNING: ANY PREEXISTING IPTABLE CHAINS RULES WILL BE DELETED, PROCEED WITH CAUTION\n'
+
+	read -p "Would you like to delete all pre-existing iptable chain rules? This will not apply to the traffic status (y/n): " dec
+	while true; do
+
+		case $dec in
+
+			y)
+				iptables -F
+				returning
+				break;;
+			n)
+				echo 'Exiting...'
+				break;;
+
+			*)
+				echo 'Invalid entry' $dec''
+		esac
+	done
+
 
 }
 
-#add logging to rules
+#add logging to all rules in form of y/n question
 function logging() {
 
-	#Option to implement logging for all rules
-	echo log func
+	
+	read -p "Please choose to add or remove logging to the iptables chain (add/rm): " lyn
+	while true; do
+
+		case $lyn in
+
+			add) 
+				iptables -A INPUT -j LOG 
+				iptables -A OUTPUT -j LOG
+				echo 'Dropped packets will now be documented in /var/log'
+				returning
+				break;;
+
+			rm) 
+				iptables -D INPUT -j LOG
+				iptables -D OUTPUT -j LOG
+				echo 'Packets will no longer be logged'
+				returning
+				break;;
+
+			*)
+				echo 'Invalid entry' $lyn
+		esac
+	done
 
 }
 
@@ -28,79 +108,149 @@ function logging() {
 function trafficstat() {
 
 	#ask to accept/drop traffic
-	echo trafstat func
+
+	read -p 'Please choose to ACCEPT/DROP all incoming and outgoing traffic (accept/drop): ' acyn
+
+	while true; do
+
+		case $acyn in
+
+			accept)
+					iptables -P INPUT ACCEPT
+					iptables -P OUTPUT ACCEPT
+					returning
+					break;;
+			drop) 
+					iptables -P INPUT DROP
+					iptables -P OUTPUT DROP
+					returning 
+					break;;
+			*)
+				echo 'Invlaid entry' $acyn
+		esac
+	done
+
 }
 
-#list fw rules, maybe add formatted output somehow
+#list fw rules
 function listfw(){
 
-	sudo iptables -L 
+	iptables -L 
+	returning
 
 }
 
+
+#Decision to save/load pre-existing fw rules. Will prompt to save with savef if never opened.
 function fwsave(){
 
-	echo fwsave funct
-	#Install iptables persistent if on debian/ubuntu, implement alternative method for other distros later. 
-	#Also add way to see if user saved current rules, if they didnt and quit out, then tell them that they forgot to save and if its ok to quit
+	savef=1
+
+	read -p "Would you like to save (--> /etc/fwrules) or load (<-- /etc/fwrules) current firewall rules?  (save/load): " slyn
+	while true; do
+		case $slyn in
+
+			save)
+				
+				iptables-save > /etc/fwrules
+				returning
+				break;;
+
+			load)
+				
+				iptables-restore < /etc/fwrules
+				returning
+				break;;
+
+			*)
+				
+				echo 'Invalid entry' $slyn
+		esac
+	done
+
 }
 
-function fwhelp(){
+function returning(){
 
-	#Give help to people who dont know what they are doing, might not need this
-	echo fwhelp
+	if [ $? == 0 ]; 
+	then
+		echo 'Sucess!'
+		read -p 'Return to main menu -->'
+	else
+		echo 'Process failed. Check for adequate permissions and try again.' 
+		
+	fi
 }
 
-x=0
-flag1=0
-while [ x=0 ]
-do
-	
-	if [[ flag1 -eq 0 ]]
-		then echo 'Welcome to iptaples simplified'
-		flag1=1
-		else echo '>Anything else?'
+clear
+
+while true; do
+
+	if [[ startf -eq 0 ]]
+		then 
+			echo 'Welcome to iptaples simplified'
+			startf=1
+		else 
+			clear
+			echo 'Anything else?'
+
 	fi
 
-	echo 'Pick one of these'
-	read choice
+	echo -e '---------------------------\n1. Firewall setup\n2. Delete rules\n3. Implement Logging\n4. Traffic Status\n5. List fw rules\n6. Save/Load rules\nq. Exit\n---------------------------'
+	read -p 'Plese enter a number: ' choice
+
 	case $choice in
 
 		1)
-			echo you picked one
 			fwsetup
 			;;
 		2) 
-			echo you picked two
 			delete
 			;;
 		3) 
-			echo you picked three
 			logging
 			;;
 		4)
-			echo you picked four
 			trafficstat
 			;;
 
 		5)
-			echo you picked five
 			listfw
 			;;
 		6)
-			echo you picked six
 			fwsave
 			;;
-		7)
-			echo you picked seven
-			fwhelp
-			;;
 		q) 
-			echo you found your way out the loop, peace
-			break;;
+			
+			while true; do
+				if [[ savef -eq 0 ]]
+				then 
 
-		*)
-			echo $choice is not a valid input command
+					read -p 'You have not saved/loaded any rules this session, would you like to save/load before exiting? (y/n): ' syn
+
+					while true; do
+						case $syn in
+
+							y) 
+								iptables-save > /etc/fwrules
+								break;;
+							n)
+								echo 'Goodbye!'
+								exit;;
+
+							*) 
+								echo 'Invalid response' $syn 
+							    break;;
+								
+						esac
+					done
+
+				else 	
+					echo 'Goodbye!'
+					exit
+				fi
+				done
+			break
 	esac
 done
 
