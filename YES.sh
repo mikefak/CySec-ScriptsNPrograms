@@ -8,7 +8,7 @@ ooooo  oooo  ooooooooooo      oooooooo8
   888  88     888    88      888             
     888       888ooo8         888oooooo      
     888  ooo  888    oo  ooo         888 ooo 
-   o888o 888 o888ooo8888 888 o88oooo888  888  Version 0.1 (beta)"
+   o888o 888 o888ooo8888 888 o88oooo888  888  Version 0.2.2 (beta)"
 echo -e "Yorge's Enumeration Script (Y.E.S.) by @YorgeZ\n"
 echo -e "------------------------------------------------------------\n"
 
@@ -105,8 +105,17 @@ function Net()
 		echo -e "ERROR (Make sure you run as root)\n'cat /etc/hosts' did not return anything\n"
 	fi
     
-    echo "Active TCP/UDP Connections:"
-	NETSTAT=$(netstat -plunt 2>/dev/null)
+    echo "Active Connections:"
+	NETSTAT=$(netstat -plant 2>/dev/null)
+	if [ "$NETSTAT" ];
+	then
+		echo -e "$NETSTAT\n"
+	else
+		echo -e "ERROR (Make sure you run as root)\n'netstat -plunt' did not return anything\n"
+	fi
+    
+        echo "Active TCP/UDP Connections:"
+	NETSTAT=$(netstat -putan 2>/dev/null)
 	if [ "$NETSTAT" ];
 	then
 		echo -e "$NETSTAT\n"
