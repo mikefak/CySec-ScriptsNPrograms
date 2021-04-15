@@ -131,12 +131,26 @@ function Net()
     
 }
 
+function UserAndPassInfo
+{
+
+    # list users and su
+    # check sshd_config stuff
+    # list /etc/passwd stuff
+    # check /etc/passwd /etc/shadow /etc/sudoers etc...
+    # /etc/master.passwd
+    # plain text password check in program history (bash, sql, php, etc.)
+    # password policy check (min days, warn age, encryption type, etc.)
+
+}
+
 function OptionsList()
 {
 	echo -e " Usage: ./yes.sh <option>\n"
 	echo " Options List:"
-	echo -e "-o : Host OS info\n"
-    echo -e "-n : Network Config info\n"
+	echo -e "-o : Host OS Info\n"
+    echo -e "-n : Network Config Info\n"
+    echo -e "-u : User and Password Management Info"
 }
 
 OPTIONS="$1"
