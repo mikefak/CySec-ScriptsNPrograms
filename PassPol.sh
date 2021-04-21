@@ -22,3 +22,6 @@ then
     echo 8. Minimum password age of 1 day for non-service accounts
     echo 9. Disable storing passwords with reversible encryption
     echo 10. Enable password complexity requirements
+
+# line that actually sets the policies in the pam configuration file, change depending on what you want the policies to be
+sed -i '1s/^/password requisite pam_pwquality.so retry=4 minlen=9 difok=4 lcredit=-2 ucredit=-2 dcredit=-1 ocredit=-1 reject_username enforce_for_root password\n/' /etc/pam.d/common-password
