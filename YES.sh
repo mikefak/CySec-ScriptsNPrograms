@@ -8,7 +8,7 @@ ooooo  oooo  ooooooooooo      oooooooo8
   888  88     888    88      888             
     888       888ooo8         888oooooo      
     888  ooo  888    oo  ooo         888 ooo 
-   o888o 888 o888ooo8888 888 o88oooo888  888  Version 0.2.2 (beta)"
+   o888o 888 o888ooo8888 888 o88oooo888  888  Version 0.2.3 (beta)"
 echo -e "Yorge's Enumeration Script (Y.E.S.) by @YorgeZ\n"
 echo -e "------------------------------------------------------------\n"
 
@@ -70,7 +70,14 @@ function OS()
 		echo -e "ERROR (Make sure you run as root)\n'cpuinfo' did not return anything\n"
 	fi
     
-    # add last/lastlog
+    echo "Log info:"
+	LOG=$(lastlog 2>/dev/null)
+	if [ "$LOG" ];
+	then
+		echo -e "$LOG\n"
+	else
+		echo -e "ERROR (Make sure you run as root)\n'lastlog' did not return anything\n"
+	fi
     
 }
 
@@ -132,7 +139,7 @@ function Net()
 		echo -e "ERROR (Make sure you run as root)\n'netstat -plunt' did not return anything\n"
 	fi
 
-
+    # TO DO LIST:
     # add more network settings from /etc/ files
     # add selinux settings check
     # add routing table check
@@ -194,16 +201,84 @@ echo -e '\nList of open ports: '$ports
 
 }
 
-#function UserAndPassInfo
-# {
-
-    # list users and su
-    # check sshd_config stuff
-    # list /etc/passwd stuff
+function UserAndPassInfo
+ {
+    echo "The Current User Is:"
+	WHOAMI=$(whoami 2>/dev/null)
+	if [ "$WHOAMI" ];
+	then
+		echo -e "$WHOAMI\n"
+	else
+		echo -e "ERROR (Make sure you run as root)\n'whoami' did not return anything\n"
+	fi
+    
+	echo "Current User's Group Info:"
+	ID=$(id 2>/dev/null)
+	if [ "$ID" ];
+	then
+		echo -e "$ID\n"
+	else
+		echo -e "ERROR (Make sure you run as root)\n'id' did not return anything\n"
+	fi
+    
+    echo "PermitRootLogin Check:"
+	ROOTLOGINCHECK=$(grep "PermitRootLogin" /etc/ssh/sshd_config | grep -v "#" | awk '{print $2}')
+	if [ "$ROOTLOGINCHECK" ];
+	then
+		echo "[/] Root is allowed to login via SSH"
+		echo -e "$ROOTLOGINCHECK\n"
+	else
+		echo -e "ERROR (Make sure you run as root)\n'grep 'PermitRootLogin'' did not return anything\n"
+	fi
+    
+    echo "Password Policy Check:"
+	PASSPOLCHECK=$(grep "^PASS_MAX_DAYS\|^PASS_MIN_DAYS\|^PASS_WARN_AGE\|^ENCRYPT_METHOD" /etc/login.defs 2>/dev/null)
+	if [ "$PASSPOLCHECK" ];
+	then
+		echo -e "$PASSPOLCHECK\n"
+	else
+		echo -e "ERROR (Make sure you run as root)\n'grep' did not return anything\n"
+	fi
+    
+    echo "Check /etc/passwd For Shell Access:"
+	ETCPASSWD=$(cat /etc/passwd | grep "/bin/bash\|/bin/sh\|/bin/dash\|/bin/zsh" 2>/dev/null)
+	if [ "$ETCPASSWD" ];
+	then
+		echo -e "$ETCPASSWD\n"
+	else
+		echo -e "ERROR (Make sure you run as root)\n'cat /etc/passwd' did not return anything\n"
+	fi
+    
+    echo "Check master.passwd File:"
+    MASTERPASSWD=$(cat /etc/master.passwd 2>/dev/null)
+	if [ "$MASTERPASSWD" ];
+	then
+		echo "[/] Readable - /etc/master.passwd"
+		echo -e "$MASTERPASSWD\n"
+	else
+		echo -e "master.passwd not readable (or you failed to run as root)\n"
+	fi
+    
+    echo "Grep passwd From .bash_history:"
+	PASSWDHISTORY=$(grep passwd /home/*/.bash_history 2>/dev/null)
+	if [ "$PASSWDHISTORY" ];
+	then
+		echo -e "$PASSWDHISTORY\n"
+	else
+        echo -e "'passwd' command not found in bash_history (or you failed to run as root)\n"
+	fi
+    
+    echo "Check .conf files for the string 'password':"
+	CONFPASSCHECK=$(grep -r 'password' /etc/*.conf 2>/dev/null)
+	if [ "$CONFPASSCHECK" ];
+	then
+		echo -e "$CONFPASSCHECK\n"
+	else
+        echo -e "No files containing the string 'password' were found in /etc/*.conf files (or you failed to run as root)\n"
+	fi
+    # TO DO LIST:
     # check /etc/passwd /etc/shadow /etc/sudoers etc...
-    # /etc/master.passwd
     # plain text password check in program history (bash, sql, php, etc.)
-    # password policy check (min days, warn age, encryption type, etc.)
 
 #}
 
@@ -223,27 +298,35 @@ function YES()
 	if [ "$OPTIONS" == "" ];
 	then
 		OptionsList
-	else
+        else
+        
 		if [ "$OPTIONS" == "-o" ] || [ "$OPTIONS" == "o" ];
 		then
-			    clear
-                OS
+            clear
+            OS
             else
             
             if [ "$OPTIONS" == "-n" ] || [ "$OPTIONS" == "n" ];
             then
-                    clear
-                    Net
-				
-			else
+                clear
+                Net
+				else
+                
 				if [ "$OPTIONS" == "-AI" ] || [ "$OPTIONS" == "AI" ]
 				then
-
 					clear
 					AIF
-                else 
+                    else
                     
-                    OptionsList
+				    if [ "$OPTIONS" == "-u" ] || [ "$OPTIONS" == "u" ]
+				    then
+					   clear
+					   UserAndPassInfo
+                       else
+                       
+                       OptionsList
+                    fi
+
 				fi
             fi
         fi
