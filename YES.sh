@@ -8,7 +8,7 @@ ooooo  oooo  ooooooooooo      oooooooo8
   888  88     888    88      888             
     888       888ooo8         888oooooo      
     888  ooo  888    oo  ooo         888 ooo 
-   o888o 888 o888ooo8888 888 o88oooo888  888  Version 0.2.3 (beta)"
+   o888o 888 o888ooo8888 888 o88oooo888  888  Version 0.2.4 (beta)"
 echo -e "Yorge's Enumeration Script (Y.E.S.) by @YorgeZ\n"
 echo -e "------------------------------------------------------------\n"
 
@@ -138,11 +138,27 @@ function Net()
 	else
 		echo -e "ERROR (Make sure you run as root)\n'netstat -plunt' did not return anything\n"
 	fi
+    
+    echo "Routing Table:"
+	ROUTE=$(route -nee 2>/dev/null)
+	if [ "$ROUTE" ];
+	then
+		echo -e "$ROUTE\n" 
+	else
+		echo -e "ERROR (Make sure you run as root)\n'route -nee' did not return anything\n"
+	fi
+    
+    echo "SELinux Status::"
+	SELINUXCHECK=$(sestatus 2>/dev/null)
+	if [ "$SELINUXCHECK" ];
+	then
+		echo -e "$SELINUXCHECK\n"
+	else
+		echo -e "ERROR (Make sure you run as root)\n'sestatus' did not return anything, maybe your machine does not use SELinux\n"
+	fi
 
     # TO DO LIST:
     # add more network settings from /etc/ files
-    # add selinux settings check
-    # add routing table check
     # add iptables settings check
     
 }
@@ -189,7 +205,6 @@ then
 else
 	echo "Unable reach if.config.me, check your internet connection and try again."
 fi
-
 
 echo -e "\nList of Admin/User/Service Accounts:\n" $users
 
@@ -280,7 +295,7 @@ function UserAndPassInfo
     # check /etc/passwd /etc/shadow /etc/sudoers etc...
     # plain text password check in program history (bash, sql, php, etc.)
 
-#}
+}
 
 function OptionsList()
 {
@@ -326,7 +341,6 @@ function YES()
                        
                        OptionsList
                     fi
-
 				fi
             fi
         fi
