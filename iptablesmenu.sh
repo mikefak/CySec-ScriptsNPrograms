@@ -2,7 +2,7 @@
 
 #IPTABLES Simplified - created by @mikeffakhouri
 #must be ran with sudo permissions, ideal for servers looking to establish basic firewall rules with iptables along with other easy access methods of the utility.
-
+#Version 1.0
 
 #Info collection and iptaples implementation
 function fwsetup() {

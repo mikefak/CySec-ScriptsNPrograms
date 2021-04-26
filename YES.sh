@@ -280,7 +280,7 @@ function UserAndPassInfo
     # check /etc/passwd /etc/shadow /etc/sudoers etc...
     # plain text password check in program history (bash, sql, php, etc.)
 
-}
+#}
 
 function OptionsList()
 {
@@ -326,6 +326,7 @@ function YES()
                        
                        OptionsList
                     fi
+
 				fi
             fi
         fi
