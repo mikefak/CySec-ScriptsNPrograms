@@ -12,13 +12,20 @@ function complex()
     then
         apt-get install libpam-pwquality
     else
-        echo -e "Error, make sure you run as root or maintain a stable internet connection"
+        echo -e "Error: make sure the script is ran as an administrator or that you have a stable internet connection"
+        exit 1
+    fi
 
-    #Password complexity (uppercase,lowercase,digit,special character). Negative value indicates minimum
-    pcomplexity=( "ucredit=-1" "lcredit=-1" "dcredit=-1" "ocredit=-1" )
+   #Preset and reccomended complexity for passwords (>=1 uppercase, lowercase, digit, and special character)
+    upper="ucredit=-1"
+    lower="lcredit=-1"
+    digit="dcredit=-1"
+    special="ocredit=-1"
     
-    echo -e $pcomplexity "will be appended to enforce pw complexity"
+    echo -e $upper $lower $digit $special will be appended to enforce pw complexity
 
+    echo -e "$upper\n$lower\n$digit\n$special" | tee -a /etc/security/pwquality.conf >/dev/null
+ 
     #insert actual implementation
 }
 
@@ -27,7 +34,8 @@ function optlist()
 
     echo -e "How to use: ./Passpol.sh (option)\n"
     echo -e "Opt List:\n"
-    echo -e "-c - Enforces Password Compexity --> /etc/security/pwquality.conf"
+    echo -e "-c     Installs libpam-pwquality and enforces Password Compexity --> /etc/security/pwquality.conf"
+
 }
 OPTIONS="$1"
 function start() {
@@ -48,6 +56,7 @@ function start() {
     fi
 
 }
+start
 
 
 
