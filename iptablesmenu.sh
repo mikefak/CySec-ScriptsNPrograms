@@ -1,13 +1,89 @@
 #!/bin/bash
 
 #IPTABLES Simplified - created by @mikeffakhouri
-#must be ran with sudo permissions, ideal for servers looking to establish basic firewall rules with iptables along with other easy access methods of the utility.
-#Version 1.0
+# Must be ran with sudo permissions, ideal for servers looking to establish basic firewall rules with iptables along with other easy access methods of the utility. Not practicaly beyond baseline rules
+#Version 1.5
+
+#Checking for root privs
+uid=$(id -u)
+if [[ $uid -ne 0 ]];
+    then
+    echo "Please run as root and try again."
+    exit
+fi
+
 
 #Info collection and iptaples implementation
 function fwsetup() {
 
-	#Gathers active listening ports then print output into portnums file
+	read -p "Please select a rule preset, or allow all rules of all current listenting ports" lyn
+    echo "--------------------------------------------------------------------------"
+    echo "1. Basic Internet Access (dns, http, https)"
+    echo "2. E-Commerce Website (mysql, http, https)"
+	echo "3. Automatic Configuration for currently listening ports"
+
+
+	while true; do
+
+		case $lyn in
+
+			1)
+				bia
+				break;;
+
+			2) 
+                ecomm
+                break;;
+
+			3)
+				fwallinone
+				break;;
+		esac
+	done
+
+
+}
+
+function bia {
+
+
+	while true; do
+
+		case $yn in
+
+			y)
+
+				while read port; do
+					if [[ $port -le 49153 ]] 
+						then 
+						iptables -A INPUT -p tcp --dport $port -m state --state NEW,ESTABLISHED -j ACCEPT
+						iptables -A OUTPUT -p tcp --sport $port -m state --state ESTABLISHED -j ACCEPT
+					fi
+                    z
+				done < portnums
+				returning
+				rm portnums	
+
+				break;;
+
+			n) 
+				break;;
+
+			*) echo 'Invalid entry '$yn 
+		esac
+	done
+
+}
+
+function ecomm {
+	
+	echo "ecom web"
+
+}
+
+function fwallinone() {
+
+    #Gathers active listening ports then print output into portnums file
 
 	echo "The setup process is designed for systems hosting servers that are prematurley baselined, proceed with caution."
 	echo 'Gathering active server info...'
@@ -32,6 +108,7 @@ function fwsetup() {
 						iptables -A INPUT -p tcp --dport $port -m state --state NEW,ESTABLISHED -j ACCEPT
 						iptables -A OUTPUT -p tcp --sport $port -m state --state ESTABLISHED -j ACCEPT
 					fi
+                    
 				done < portnums
 				returning
 				rm portnums
@@ -45,8 +122,8 @@ function fwsetup() {
 		esac
 	done
 
-}
 
+}
 #Delete fw rules 
 function delete() {
 
