@@ -1,4 +1,6 @@
 #Note: Only works with users with a uid range of 1000-2000
+#User Management Script - By mikefak
+#Collects an imported/manual list of users and compares it with the users listed in /etc/passwd
 
 from datetime import date
 today = date.today() 
