@@ -4,4 +4,4 @@ Enumeration, privilege escalation, firewall, and various other scripts created f
 
 ## Contributors
 
-Contributions by mffakhouri, YorgeZ, and youngysf.
+Contributions by mikefak, YorgeZ, and youngysf.
