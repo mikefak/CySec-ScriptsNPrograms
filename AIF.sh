@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#Asset Inventory Fast (AIF) - By mikeffakhouri
+#Asset Inventory Fast (AIF) - By mikefak
 
 #Date and os/version assignent
 date=$(date "+DATE: %Y-%m-%d %nTIME: %H:%M:%S")
