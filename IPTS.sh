@@ -2,7 +2,7 @@
 
 #IPTABLES Simplified - created by @mikefak
 #must be ran with sudo permissions, ideal for servers looking to establish basic firewall rules with iptables along with other easy access methods of the utility.
-#Version 1.5
+#Version 2.0
 
 #Info collection and iptaples implementation
 
@@ -16,20 +16,24 @@ fi
 
 function fwsetup () {
 
-    read -p "Please select an option for firewall configuration" dec
+
+	echo -e "\n1. Autosetup\n2. Custom Setup"
+    read -p "Please select an option for firewall configuration: " dec
+	
 	
 	while true; do
 
 		case $dec in
 
 			1)
-				#option 3, autosetup
-				echo "opt3"
-				;;
+				fwautosetup
+				break;;
 			
 			2)
-				#custom
-				fwautosetup
+				customsetup
+				break;;
+
+			*) echo "Invalid entry" $dec
 				returning
 				break;;
 		esac
@@ -37,22 +41,11 @@ function fwsetup () {
             
 }
 
-function ecomm() {
-
-	echo "ecomm funct"
-}
-
-function database () {
-
-	echo "database funct"
-}
-
-
 function fwautosetup() {
 
 	#Gathers active listening ports then print output into portnums file
 
-	echo "The setup process is designed for systems hosting servers that are prematurley baselined, proceed with caution."
+	echo -e "\nThe setup process is designed for systems hosting servers that are prematurley baselined, proceed with caution."
 	echo 'Gathering active server info...'
 	netstat -plnt | grep LISTEN |  awk '{print$4}' | sed 's/.*://' > portnums	
 
@@ -70,14 +63,14 @@ function fwautosetup() {
 			y)
 
 				while read port; do
-					if [[ $port -le 49153 ]] 
+					if [[ $port ]] 
 						then 
 						iptables -A INPUT -p tcp --dport $port -m state --state NEW,ESTABLISHED -j ACCEPT
 						iptables -A OUTPUT -p tcp --sport $port -m state --state ESTABLISHED -j ACCEPT
 					fi
 				done < portnums
 				returning
-				rm portnums
+				
 				break;;
 
 			n) 
@@ -89,6 +82,35 @@ function fwautosetup() {
 		esac
 	done
 
+}
+
+function customsetup () {
+
+	flag=0
+	while true; do
+
+		read -p "Enter the portnumbers you would like to accept, one by one. q to finish: " pn
+		if [[ "$pn" == "q" ]];
+		then
+			break
+		
+		elif [ "$pn" > 0 ];
+		then
+			echo $pn >> portnums
+		
+		else
+			echo "Please enter a valid number"
+		fi
+	done
+
+	while read port; do
+
+		iptables -A INPUT -p tcp --dport $port -m state --state NEW,ESTABLISHED -j ACCEPT
+		iptables -A OUTPUT -p tcp --sport $port -m state --state ESTABLISHED -j ACCEPT
+				
+	done < portnums
+	rm portnums
+	returning
 }
 
 #inet/nonet function
@@ -134,27 +156,20 @@ function delete() {
 
 	#ask to delete all rules
 
-	read -p "What kind of deletion would you like to proceed with? (one/multi/all) " dec
+	read -p "WARNING: ALL PREXISTING RULED WILL BE DELETED, IS THIS OK? (yes/no): " dec
 	
 	while true; do
 
 		case $dec in
 
-			one)
+			yes)
 
-				#call onedel funct
+				iptables -F
 				returning
 				break;;
 
-			multi)
-
-				#call multidel funct
-				returning
-				break;;
-
-			all)
+			no)
 				
-				#call alldel funct
 				returning
 				break;;
 
@@ -162,11 +177,8 @@ function delete() {
 				echo 'Invalid entry' $dec
 				returning
 				break;;
-
-
 		esac
 	done
-
 
 }
 
@@ -237,7 +249,6 @@ function listfw(){
 	returning
 
 }
-
 
 #Decision to save/load pre-existing fw rules. Will prompt to save with savef if never opened.
 function fwsave(){
