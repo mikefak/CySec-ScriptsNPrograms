@@ -1,33 +1,105 @@
 #!/bin/bash
 
-# Password Policy script ("PassPol") by young
+#Password Policy Script by mikeffakhouri and youngysf
 
-#!/bin/bash
+#Script made to easily establish basic and 
 
-# Password Policy Script ("PassPol") by young
 
-# check if pam.d directory exists to determine whether or not pam is installed. if not, notify the user.
-FILE="pam.d"
-if [ -d "$FILE" ]
+#WARNING: The following script will edit pre-existing password policy configurations, proceed with caution
+
+pwq=$(apt-get install libpam-pwquality 2>/dev/null)
+
+if [ "$pwq" ];
 then
-
-    echo The following password policies will be enforced:
-    echo 1. All four types of characters (1 upper case character, 1 lower case character, 1 special
-    character, 1 number)
-    echo 2. 10 Character Minimum
-    echo 3. Lockout the user after 5 failed password attempts
-    echo 4. Set the lockout period to last 15 minutes
-    echo 5. Maximum of 90 days before a user’s password must be changed
-    echo 6. Remember the last 3 passwords
-    echo 7. No password hints.
-    echo 8. Minimum password age of 1 day for non-service accounts
-    echo 9. Disable storing passwords with reversible encryption
-    echo 10. Enable password complexity requirements
-
-# line that actually sets the policies in the pam configuration file, change depending on what you want the policies to be
-sed -i '1s/^/password requisite pam_pwquality.so retry=4 minlen=9 difok=4 lcredit=-2 ucredit=-2 dcredit=-1 ocredit=-1 reject_username enforce_for_root password\n/' /etc/pam.d/common-password
-
-# tell user to install pam if not installed
+        apt-get install libpam-pwquality
 else
+    echo -e "Error: make sure the script is ran as an administrator or that you have a stable internet connection"
+    exit 1
+fi
+
+function complex()
+{
+
+   #Preset and reccomended complexity for passwords (>=1 uppercase, lowercase, digit, and special character)
+    upper="ucredit=-1"
+    lower="lcredit=-1"
+    digit="dcredit=-1"
+    special="ocredit=-1"
     
-    echo You must have PAM installed to use this script.
+    echo -e "\n$upper\n$lower\n$digit\n$special\n" | tee -a /etc/security/pwquality.conf
+    echo "The above libpam-pw complexity rules have been appended to /etc/security/pwquality.conf"
+ 
+}
+
+function minlen()
+{
+
+    #Default min password length to eight
+    minln="minlen=8"
+
+    echo -e "$minln\n" | tee -a /etc/security/pwquality.conf
+
+    echo -e "The above libpam-pw minimum password length rules have been appended to /etc/security/pwquality.conf"
+}
+
+function faillock()
+{
+
+    #Defaults to 5 attempts (15 min interval from first failure) and 15 minute lockout period
+    deny="deny=5"
+    failint="fail_interval=900"
+    utime="unlock_time=600"
+
+    echo -e "\n$deny\n$failint\n$utime" | tee -a /etc/security/faillock.conf
+
+    echo -e "The above faillock configurations have been appended to /etc/security/faillock.conf"
+
+
+}
+
+function optlist()
+{
+
+    echo -e "How to use: ./Passpol.sh (option)\n"
+    echo -e "Opt List:\t \"-->\" symbolizes the configuration file that will be altered\n"
+    echo -e "-c     Appends password complexity rules (lowerchar, upperchar, specialchar, digit) --> /etc/security/pwquality.conf\n"
+    echo -e "-l     Establishes Password Minimum Length --> /etc/security/pwquality.conf\n"
+    echo -e "-k     Lockouts user for (x) seconds after failing (x) password attempts --> /etc/security/faillock.conf"
+
+}
+OPTIONS="$1"
+function start() {
+
+    if [ "$OPTIONS" == "" ]
+
+    then
+
+        optlist
+
+    else
+
+        if [ "$OPTIONS" == "-c" ] || [ "$OPTIONS" == "c" ];
+        then
+            complex
+
+        else
+
+            if [ "$OPTIONS" == "-l" ] || [ "$OPTIONS" == "l" ];
+            then
+                minlen
+            
+            else
+
+                if [ "$OPTIONS" == "-k" ] || [ "$OPTIONS" == "k" ];
+                then
+                    faillock
+                
+                fi
+            
+            fi
+
+        fi 
+    fi
+
+}
+start
